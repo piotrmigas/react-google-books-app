@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container, CircularProgress, Typography, Button } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
 import Masonry from "react-masonry-css";
-import { fetchBooks, sortBooks, loadMoreBooks } from "../redux/actions";
+import { fetchBooks, sortBooks, loadMoreBooks, setStartIndex } from "../redux/bookSlice";
 import Search from "../components/Search";
 import BookCard from "../components/BookCard";
 import FilterBtn from "../components/FilterBtn";
@@ -22,16 +22,14 @@ const useStyles = makeStyles({
 });
 
 const Home = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [startIndex, setStartIndex] = useState(10);
   const classes = useStyles();
   const dispatch = useDispatch();
+
+  const { status, books, filterBy, totalItems, searchTerm, startIndex } = useSelector((state) => state);
 
   useEffect(() => {
     dispatch(fetchBooks(searchTerm));
   }, [dispatch, searchTerm]);
-
-  const { loading, error, books, filterBy, totalItems } = useSelector((state) => state);
 
   const breakpoints = {
     default: 3,
@@ -40,13 +38,13 @@ const Home = () => {
   };
 
   const loadMore = () => {
-    setStartIndex(startIndex + 11);
-    dispatch(loadMoreBooks(searchTerm, startIndex));
+    dispatch(setStartIndex(startIndex + 11));
+    dispatch(loadMoreBooks({ searchTerm, filterBy, startIndex }));
   };
 
   return (
     <Container>
-      <Search setSearchTerm={setSearchTerm} />
+      <Search />
       <Typography variant="h5" className={classes.header}>
         {`${searchTerm ? "Search results" : "Programming books"}:`}
       </Typography>
@@ -55,25 +53,25 @@ const Home = () => {
           variant="contained"
           className={classes.button}
           color="primary"
-          onClick={() => dispatch(sortBooks(searchTerm, filterBy))}
+          onClick={() => dispatch(sortBooks({ searchTerm, filterBy }))}
         >
           Sort by newest
         </Button>
         <FilterBtn searchTerm={searchTerm} />
       </div>
-      {error && <p>Error fetching books</p>}
+      {status === "failed" && <p>Error fetching books</p>}
       {searchTerm && books.length === undefined && <h3>No matching books found!</h3>}
       <Masonry breakpointCols={breakpoints} className="my-masonry-grid" columnClassName="my-masonry-grid_column">
         {books.map((book) => (
           <BookCard book={book} key={book.id} />
         ))}
       </Masonry>
-      {loading && (
+      {status === "loading" && (
         <div className={classes.spinner}>
           <CircularProgress />
         </div>
       )}
-      {books.length < totalItems && !loading && (
+      {books.length < totalItems && status === "success" && (
         <div className={classes.buttons}>
           <Button variant="contained" color="primary" onClick={loadMore}>
             Load More

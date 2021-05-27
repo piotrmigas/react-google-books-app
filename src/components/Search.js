@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import SearchBar from "material-ui-search-bar";
+import { useDispatch } from "react-redux";
+import { setSearchTerm } from "../redux/bookSlice";
 
-const Search = ({ setSearchTerm }) => {
+const Search = () => {
+  const dispatch = useDispatch();
   const [state, setState] = useState("");
   const initial = useRef(null);
 
@@ -12,11 +15,11 @@ const Search = ({ setSearchTerm }) => {
     }
 
     const timer = setTimeout(() => {
-      setSearchTerm(state);
+      dispatch(setSearchTerm(state));
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [setSearchTerm, state]);
+  }, [dispatch, state]);
 
   return (
     <SearchBar
