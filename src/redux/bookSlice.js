@@ -1,15 +1,15 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-export const fetchBooks = createAsyncThunk("fetchBooks", async (searchTerm) => {
-  const endpoint = `https://www.googleapis.com/books/v1/volumes?q=${searchTerm ? searchTerm : "programming"}&key=${
-    process.env.REACT_APP_GOOGLE_KEY
-  }`;
+export const fetchBooks = createAsyncThunk("fetchBooks", async ({ searchTerm, filterBy }) => {
+  const endpoint = `https://www.googleapis.com/books/v1/volumes?q=${searchTerm ? searchTerm : "programming"}${
+    filterBy && `&filter=${filterBy}`
+  }&key=${process.env.REACT_APP_GOOGLE_KEY}`;
 
   const {
     data: { items, totalItems },
   } = await axios(endpoint);
-  return { items, totalItems, searchTerm };
+  return { items, totalItems, searchTerm, filterBy };
 });
 
 export const sortBooks = createAsyncThunk("sortBooks", async ({ searchTerm, filterBy }) => {
@@ -64,6 +64,7 @@ export const slice = createSlice({
       state.books = action.payload.items;
       state.searchTerm = action.payload.searchTerm;
       state.totalItems = action.payload.totalItems;
+      state.filterBy = action.payload.filterBy;
       state.status = "success";
     },
     [fetchBooks.rejected]: (state) => {

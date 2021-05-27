@@ -28,8 +28,8 @@ const Home = () => {
   const { status, books, filterBy, totalItems, searchTerm, startIndex } = useSelector((state) => state);
 
   useEffect(() => {
-    dispatch(fetchBooks(searchTerm));
-  }, [dispatch, searchTerm]);
+    dispatch(fetchBooks({ searchTerm, filterBy }));
+  }, [dispatch, searchTerm, filterBy]);
 
   const breakpoints = {
     default: 3,
