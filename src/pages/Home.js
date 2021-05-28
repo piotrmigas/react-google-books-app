@@ -28,7 +28,12 @@ const Home = () => {
   const { status, books, filterBy, totalItems, searchTerm, startIndex } = useSelector((state) => state);
 
   useEffect(() => {
-    dispatch(fetchBooks({ searchTerm, filterBy }));
+    if (!searchTerm && !filterBy && localStorage.getItem("persist:root")) {
+      console.log("local");
+      return;
+    } else {
+      dispatch(fetchBooks({ searchTerm, filterBy }));
+    }
   }, [dispatch, searchTerm, filterBy]);
 
   const breakpoints = {
